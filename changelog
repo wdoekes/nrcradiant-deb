@@ -1,3 +1,16 @@
+nrcradiant (1.5.0+20220528+1-WIP+REL) stable; urgency=medium
+
+  * Add "denumberized maps" (preferences -> save entity/brush numbers)
+    so we can keep map changes in a vcs.
+  * Move q3map2 and other helpers to /usr/lib/$ARCH/nrcradiant and fix
+    [RadiantPath] references in q3.game. Now we can call F4 autocaulk we can
+    use the build menu.
+  * Have [EnginePath] point to /usr/share/nrcradiant/gamepacks/q3.game/ by
+    default. This is where common-spog.pk3 lives and that contains the
+    common texture images (caulk.tga and friends).
+
+ -- Walter Doekes <wjdoekes+nrcradiant@osso.nl>  Sun, 05 Jun 2022 15:35:47 +0200
+
 nrcradiant (1.5.0+20220528+1-0wjd1+REL) stable; urgency=medium
 
   * Initial release
@@ -10,4 +23,4 @@ nrcradiant (1.5.0+20220528+1-0wjd1+REL) stable; urgency=medium
   * TODO: docs, which are saved in /usr/share/*radiant/ are not readable by
     snap-sandboxed browsers. Should be in /usr/share/doc/*.
 
- -- Walter Doekes <wjdoekes+netradiant@osso.nl>  Sun, 05 Jun 2022 14:04:29 +0200
+ -- Walter Doekes <wjdoekes+nrcradiant@osso.nl>  Sun, 05 Jun 2022 14:04:29 +0200

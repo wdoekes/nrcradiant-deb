@@ -86,20 +86,27 @@ Game configuration will be stored in ``~/.config/nrcradiant``::
     ~/.config/nrcradiant/1.5.0/q3.game/shortcuts.ini
     ~/.config/nrcradiant/1.5.0/radiant.log
 
-Shader config is scanned in this order (continues even when found)::
+If you set paths as follows::
 
-    ~/Documents/q3maps/baseq3/scripts/shaderlist.txt
+    EnginePath = /usr/share/nrcradiant/gamepacks/q3.game/
+    ExtraResoucePath = ~/.q3a/  (yes, it's ExtraResourcePath withour 'r')
+
+Then shader lists are scanned in this order (continues even when found)::
+
+    /usr/share/nrcradiant/gamepacks/q3.game/baseq3/default_shaderlist.txt
+    /usr/share/nrcradiant/gamepacks/q3.game/baseq3/scripts/shaderlist.txt (read-write)
+    /usr/share/nrcradiant/gamepacks/q3.game/baseq3/scripts/shaderlist.txt
     ~/.q3a/baseq3/scripts/shaderlist.txt
-    /usr/share/nrcradiant/base/scripts/shaderlist.txt
+    ~/.q3a/scripts/shaderlist.txt
 
-Shader image locations are scanned in this order (stops when found)::
+And shader image locations are scanned in this order (stops when found)::
 
-    /usr/share/nrcradiant/base/textures/common/watercaulk.jpg
+    ~/.q3a/textures/common/watercaulk.jpg
     ~/.q3a/baseq3/textures/common/watercaulk.jpg
-    ~/Documents/q3maps/baseq3/textures/common/watercaulk.jpg
-    /usr/share/nrcradiant/base/textures/common/watercaulk.tga
+    /usr/share/nrcradiant/gamepacks/q3.game/baseq3/textures/common/watercaulk.jpg
+    ~/.q3a/textures/common/watercaulk.tga
     ~/.q3a/baseq3/textures/common/watercaulk.tga
-    ~/Documents/q3maps/baseq3/textures/common/watercaulk.tga
+    /usr/share/nrcradiant/gamepacks/q3.game/baseq3/textures/common/watercaulk.tga
 
 
 Other
@@ -113,6 +120,8 @@ BUGS/TODO
 
 * See if we can find an appropriate version better than
   1.5.0+20220215+3.
+
+* BUG: openat(AT_FDCWD, "/usr/share/nrcradiant/gamepacks/q3.game/baseq3/scripts/shaderlist.txt", O_WRONLY|O_CREAT|O_TRUNC, 0666) = -1 EACCES
 
 * Document/decide on handling the gamepacks:
 
