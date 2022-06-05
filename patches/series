@@ -1,3 +1,4 @@
 mbspc-do-not-leave-log-turds-for-nothing.patch
+nrcradiant-denumberized-maps.patch
 nrcradiant-fhs-paths.patch
 nrcradiant-no-move-map-symlink.patch

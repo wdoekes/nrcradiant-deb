@@ -1,0 +1,264 @@
+Description: port of "denumberized maps" from netradiant proper
+ commit ab35d2859c400749e32f801ad8cc5284ac0a0078
+ by Thomas Debesse at Sat May 5 19:35:27 2018 +0200
+ "add an opt-out setting to not write entity and brush number comment on map write"
+ https://netradiant.gitlab.io/post/2018-10-03-denumberized-maps/
+
+diff --git a/include/imap.h b/include/imap.h
+index 9228954c..71239f51 100644
+--- a/include/imap.h
++++ b/include/imap.h
+@@ -64,7 +64,7 @@ public:
+ /// \brief Read a map graph into \p root from \p outputStream, using \p entityTable to create entities.
+ 	virtual void readGraph( scene::Node& root, TextInputStream& inputStream, EntityCreator& entityTable ) const = 0;
+ /// \brief Write the map graph obtained by applying \p traverse to \p root into \p outputStream.
+-	virtual void writeGraph( scene::Node& root, GraphTraversalFunc traverse, TextOutputStream& outputStream ) const = 0;
++	virtual void writeGraph( scene::Node& root, GraphTraversalFunc traverse, TextOutputStream& outputStream, bool writeComments ) const = 0;
+ };
+ 
+ 
+diff --git a/plugins/mapq3/plugin.cpp b/plugins/mapq3/plugin.cpp
+index 6e3ce6ab..27a4bb43 100644
+--- a/plugins/mapq3/plugin.cpp
++++ b/plugins/mapq3/plugin.cpp
+@@ -118,12 +118,12 @@ public:
+ 		Map_Read( root, tokeniser, entityTable, *this );
+ 		tokeniser.release();
+ 	}
+-	void writeGraph( scene::Node& root, GraphTraversalFunc traverse, TextOutputStream& outputStream ) const {
++	void writeGraph( scene::Node& root, GraphTraversalFunc traverse, TextOutputStream& outputStream, bool writeComments ) const {
+ 		TokenWriter& writer = GlobalScripLibModule::getTable().m_pfnNewSimpleTokenWriter( outputStream );
+ 		writer.writeToken( "Version" );
+ 		writer.writeInteger( MapVersion );
+ 		writer.nextLine();
+-		Map_Write( root, traverse, writer, false );
++		Map_Write( root, traverse, writer, false, writeComments );
+ 		writer.release();
+ 	}
+ };
+@@ -189,12 +189,12 @@ public:
+ 		Map_Read( root, tokeniser, entityTable, *this );
+ 		tokeniser.release();
+ 	}
+-	void writeGraph( scene::Node& root, GraphTraversalFunc traverse, TextOutputStream& outputStream ) const {
++	void writeGraph( scene::Node& root, GraphTraversalFunc traverse, TextOutputStream& outputStream, bool writeComments ) const {
+ 		TokenWriter& writer = GlobalScripLibModule::getTable().m_pfnNewSimpleTokenWriter( outputStream );
+ 		writer.writeToken( "Version" );
+ 		writer.writeInteger( MapVersion );
+ 		writer.nextLine();
+-		Map_Write( root, traverse, writer, false );
++		Map_Write( root, traverse, writer, false, writeComments );
+ 		writer.release();
+ 	}
+ };
+@@ -296,9 +296,9 @@ public:
+ 		Map_Read( root, tokeniser, entityTable, *this );
+ 		tokeniser.release();
+ 	}
+-	void writeGraph( scene::Node& root, GraphTraversalFunc traverse, TextOutputStream& outputStream ) const {
++	void writeGraph( scene::Node& root, GraphTraversalFunc traverse, TextOutputStream& outputStream, bool writeComments ) const {
+ 		TokenWriter& writer = GlobalScripLibModule::getTable().m_pfnNewSimpleTokenWriter( outputStream );
+-		Map_Write( root, traverse, writer, false );
++		Map_Write( root, traverse, writer, false, writeComments );
+ 		writer.release();
+ 	}
+ };
+@@ -373,9 +373,9 @@ public:
+ 		Map_Read( root, tokeniser, entityTable, *this );
+ 		tokeniser.release();
+ 	}
+-	void writeGraph( scene::Node& root, GraphTraversalFunc traverse, TextOutputStream& outputStream ) const {
++	void writeGraph( scene::Node& root, GraphTraversalFunc traverse, TextOutputStream& outputStream, bool writeComments ) const {
+ 		TokenWriter& writer = GlobalScripLibModule::getTable().m_pfnNewSimpleTokenWriter( outputStream );
+-		Map_Write( root, traverse, writer, true );
++		Map_Write( root, traverse, writer, true, writeComments );
+ 		writer.release();
+ 	}
+ };
+@@ -416,9 +416,9 @@ public:
+ 		Map_Read( root, tokeniser, entityTable, *this );
+ 		tokeniser.release();
+ 	}
+-	void writeGraph( scene::Node& root, GraphTraversalFunc traverse, TextOutputStream& outputStream ) const {
++	void writeGraph( scene::Node& root, GraphTraversalFunc traverse, TextOutputStream& outputStream, bool writeComments ) const {
+ 		TokenWriter& writer = GlobalScripLibModule::getTable().m_pfnNewSimpleTokenWriter( outputStream );
+-		Map_Write( root, traverse, writer, true );
++		Map_Write( root, traverse, writer, true, writeComments );
+ 		writer.release();
+ 	}
+ };
+@@ -492,9 +492,9 @@ public:
+ 		Map_Read( root, tokeniser, entityTable, *this );
+ 		tokeniser.release();
+ 	}
+-	void writeGraph( scene::Node& root, GraphTraversalFunc traverse, TextOutputStream& outputStream ) const {
++	void writeGraph( scene::Node& root, GraphTraversalFunc traverse, TextOutputStream& outputStream, bool writeComments ) const {
+ 		TokenWriter& writer = GlobalScripLibModule::getTable().m_pfnNewSimpleTokenWriter( outputStream );
+-		Map_Write( root, traverse, writer, true );
++		Map_Write( root, traverse, writer, true, writeComments );
+ 		writer.release();
+ 	}
+ };
+@@ -640,7 +640,7 @@ public:
+ 		VMF_Read( root, tokeniser, entityTable );
+ 		tokeniser.release();
+ 	}
+-	void writeGraph( scene::Node& root, GraphTraversalFunc traverse, TextOutputStream& outputStream ) const {
++	void writeGraph( scene::Node& root, GraphTraversalFunc traverse, TextOutputStream& outputStream, bool writeComments ) const {
+ 	}
+ };
+ 
+diff --git a/plugins/mapq3/write.cpp b/plugins/mapq3/write.cpp
+index 4bca5d39..ac1aed2d 100644
+--- a/plugins/mapq3/write.cpp
++++ b/plugins/mapq3/write.cpp
+@@ -61,9 +61,10 @@ class WriteTokensWalker : public scene::Traversable::Walker
+ 	mutable Stack<bool> m_stack;
+ 	TokenWriter& m_writer;
+ 	bool m_ignorePatches;
++	bool m_writeComments;
+ public:
+-	WriteTokensWalker( TokenWriter& writer, bool ignorePatches )
+-		: m_writer( writer ), m_ignorePatches( ignorePatches ){
++	WriteTokensWalker( TokenWriter& writer, bool ignorePatches, bool writeComments )
++		: m_writer( writer ), m_ignorePatches( ignorePatches ), m_writeComments( writeComments ){
+ 	}
+ 	bool pre( scene::Node& node ) const {
+ 		m_stack.push( false );
+@@ -75,10 +76,13 @@ public:
+ 				globalErrorStream() << "discarding empty group entity: # = " << g_count_entities << "; classname = " << entity->getClassName() << "\n";
+ 				return false;
+ 			}
+-			m_writer.writeToken( "//" );
+-			m_writer.writeToken( "entity" );
+-			m_writer.writeUnsigned( g_count_entities++ );
+-			m_writer.nextLine();
++			if ( m_writeComments ) {
++				m_writer.writeToken( "//" );
++				m_writer.writeToken( "entity" );
++				m_writer.writeUnsigned( g_count_entities );
++				m_writer.nextLine();
++			}
++			++g_count_entities;
+ 
+ 			m_writer.writeToken( "{" );
+ 			m_writer.nextLine();
+@@ -91,10 +95,13 @@ public:
+ 			MapExporter* exporter = Node_getMapExporter( node );
+ 			if ( exporter != 0
+ 			  && !( m_ignorePatches && Node_isPatch( node ) ) ) {
+-				m_writer.writeToken( "//" );
+-				m_writer.writeToken( "brush" );
+-				m_writer.writeUnsigned( g_count_brushes++ );
+-				m_writer.nextLine();
++				if ( m_writeComments ) {
++					m_writer.writeToken( "//" );
++					m_writer.writeToken( "brush" );
++					m_writer.writeUnsigned( g_count_brushes );
++					m_writer.nextLine();
++				}
++				++g_count_brushes;
+ 
+ 				exporter->exportTokens( m_writer );
+ 			}
+@@ -111,7 +118,7 @@ public:
+ 	}
+ };
+ 
+-void Map_Write( scene::Node& root, GraphTraversalFunc traverse, TokenWriter& writer, bool ignorePatches ){
++void Map_Write( scene::Node& root, GraphTraversalFunc traverse, TokenWriter& writer, bool ignorePatches, bool writeComments ){
+ 	g_count_entities = 0;
+-	traverse( root, WriteTokensWalker( writer, ignorePatches ) );
++	traverse( root, WriteTokensWalker( writer, ignorePatches, writeComments ) );
+ }
+diff --git a/plugins/mapq3/write.h b/plugins/mapq3/write.h
+index 1c61bb77..89ab4b89 100644
+--- a/plugins/mapq3/write.h
++++ b/plugins/mapq3/write.h
+@@ -23,4 +23,4 @@
+ 
+ #include "imap.h"
+ 
+-void Map_Write( scene::Node& root, GraphTraversalFunc traverse, TokenWriter& writer, bool ignorePatches );
++void Map_Write( scene::Node& root, GraphTraversalFunc traverse, TokenWriter& writer, bool ignorePatches, bool writeComments );
+diff --git a/plugins/mapxml/plugin.cpp b/plugins/mapxml/plugin.cpp
+index 7208cb18..64884a98 100644
+--- a/plugins/mapxml/plugin.cpp
++++ b/plugins/mapxml/plugin.cpp
+@@ -77,7 +77,7 @@ public:
+ 	void readGraph( scene::Node& root, TextInputStream& inputStream, EntityCreator& entityTable ) const {
+ 		Map_Read( root, inputStream, entityTable );
+ 	}
+-	void writeGraph( scene::Node& root, GraphTraversalFunc traverse, TextOutputStream& outputStream ) const {
++	void writeGraph( scene::Node& root, GraphTraversalFunc traverse, TextOutputStream& outputStream, bool writeComments ) const {
+ 		Map_Write( root, traverse, outputStream );
+ 	}
+ };
+diff --git a/radiant/map.cpp b/radiant/map.cpp
+index 5884b29e..28f59156 100644
+--- a/radiant/map.cpp
++++ b/radiant/map.cpp
+@@ -80,6 +80,8 @@
+ #include "patch.h"
+ #include "grid.h"
+ 
++bool g_writeMapComments = true;
++
+ class NameObserver
+ {
+ 	UniqueNames& m_names;
+@@ -1305,7 +1307,7 @@ void Map_Traverse_Selected( scene::Node& root, const scene::Traversable::Walker&
+ }
+ 
+ void Map_ExportSelected( TextOutputStream& out, const MapFormat& format ){
+-	format.writeGraph( GlobalSceneGraph().root(), Map_Traverse_Selected, out );
++	format.writeGraph( GlobalSceneGraph().root(), Map_Traverse_Selected, out, g_writeMapComments );
+ }
+ 
+ void Map_Traverse( scene::Node& root, const scene::Traversable::Walker& walker ){
+@@ -2409,7 +2411,7 @@ void map_autocaulk_selected(){
+ 				traversable->traverse( selected_point_entities_walker( walker ) );
+ 			}
+ 		};
+-		format.writeGraph( GlobalSceneGraph().root(), traverse_selected_point_entities, file );
++		format.writeGraph( GlobalSceneGraph().root(), traverse_selected_point_entities, file, g_writeMapComments );
+ 
+ 		writer.release();
+ 	}
+@@ -2532,6 +2534,7 @@ void map_autocaulk_selected(){
+ 
+ void Map_constructPreferences( PreferencesPage& page ){
+ 	page.appendCheckBox( "", "Load last map at startup", g_bLoadLastMap );
++	page.appendCheckBox( "", "Add entity and brush number comments on map write", g_writeMapComments );
+ }
+ 
+ 
+@@ -2602,6 +2605,7 @@ void Map_Construct(){
+ 	GlobalPreferenceSystem().registerPreference( "LastMap", CopiedStringImportStringCaller( g_strLastMap ), CopiedStringExportStringCaller( g_strLastMap ) );
+ 	GlobalPreferenceSystem().registerPreference( "LoadLastMap", BoolImportStringCaller( g_bLoadLastMap ), BoolExportStringCaller( g_bLoadLastMap ) );
+ 	GlobalPreferenceSystem().registerPreference( "MapInfoDlg", WindowPositionImportStringCaller( g_posMapInfoWnd ), WindowPositionExportStringCaller( g_posMapInfoWnd ) );
++	GlobalPreferenceSystem().registerPreference( "WriteMapComments", BoolImportStringCaller( g_writeMapComments ), BoolExportStringCaller( g_bLoadLastMap ) );
+ 
+ 	PreferencesDialog_addSettingsPreferences( FreeCaller1<PreferencesPage&, Map_constructPreferences>() );
+ 
+diff --git a/radiant/referencecache.cpp b/radiant/referencecache.cpp
+index 430370c6..8442c3bd 100644
+--- a/radiant/referencecache.cpp
++++ b/radiant/referencecache.cpp
+@@ -54,6 +54,7 @@ ModelModules& ReferenceAPI_getModelModules();
+ #include "map.h"
+ #include "filetypes.h"
+ 
++extern bool g_writeMapComments;
+ 
+ bool References_Saved();
+ 
+@@ -105,7 +106,7 @@ bool MapResource_saveFile( const MapFormat& format, scene::Node& root, GraphTrav
+ 	if ( !file.failed() ) {
+ 		globalOutputStream() << "success\n";
+ 		ScopeDisableScreenUpdates disableScreenUpdates( path_get_filename_start( filename ), "Saving Map" );
+-		format.writeGraph( root, traverse, file );
++		format.writeGraph( root, traverse, file, g_writeMapComments );
+ 		return true;
+ 	}
+ 
