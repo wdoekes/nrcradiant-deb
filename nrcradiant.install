@@ -1,0 +1,3 @@
+# These are in 'debian/tmp'. We do manual stuff in debian/rules to put
+# the main stuff in debian/tmp.
+usr/ ./

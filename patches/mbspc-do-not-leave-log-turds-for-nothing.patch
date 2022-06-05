@@ -1,0 +1,119 @@
+Description: for help and unknown commands, do not write bspc.log
+ Otherwise these bspc.log files end up at the weirdest places.
+
+--- a/tools/mbspc/mbspc/bspc.c
++++ b/tools/mbspc/mbspc/bspc.c
+@@ -515,8 +515,7 @@ int main (int argc, char **argv)
+ 
+ 	start_time = I_FloatTime();
+ 
+-	Log_Open("bspc.log");		//open a log file
+-	Log_Print("BSPC version "BSPC_VERSION", %s %s\n", __DATE__, __TIME__);
++	Log_Open("bspc.log");		//lazily open a log file
+ 
+ 	DefaultCfg();
+ 	for (i = 1; i < argc; i++)
+@@ -747,7 +746,7 @@ int main (int argc, char **argv)
+ #endif //ME
+ 		else
+ 		{
+-			Log_Print("unknown parameter %s\n", argv[i]);
++			fprintf(stderr, "unknown parameter %s\n", argv[i]);
+ 			break;
+ 		} //end else
+ 	} //end for
+@@ -1025,7 +1024,8 @@ int main (int argc, char **argv)
+ 	} //end if
+ 	else
+ 	{
+-		Log_Print("Usage:   bspc [-<switch> [-<switch> ...]]\n"
++		printf("BSPC version "BSPC_VERSION", "__DATE__" "__TIME__"\n"
++			"Usage:   bspc [-<switch> [-<switch> ...]]\n"
+ #if defined(WIN32) || defined(_WIN32)
+ 			"Example 1: bspc -bsp2aas d:\\quake3\\baseq3\\maps\\mymap?.bsp\n"
+ 			"Example 2: bspc -bsp2aas d:\\quake3\\baseq3\\pak0.pk3\\maps/q3dm*.bsp\n"
+@@ -1080,8 +1080,10 @@ int main (int argc, char **argv)
+ 			"              = sets the subdivide size to the given float\n"*/
+ 			"\n");
+ 	} //end else
+-	Log_Print("BSPC run time is %5.0f seconds\n", I_FloatTime() - start_time);
+-	Log_Close();						//close the log file
++	if (Log_IsActive()) {
++		Log_Print("BSPC run time is %5.0f seconds\n", I_FloatTime() - start_time);
++		Log_Close();						//close the log file
++	}
+ 	return 0;
+ } //end of the function main
+ 
+--- a/tools/mbspc/mbspc/l_log.c
++++ b/tools/mbspc/mbspc/l_log.c
+@@ -38,6 +38,8 @@ typedef struct logfile_s
+ 
+ logfile_t logfile;
+ 
++static void real_Log_Open(void);
++
+ //===========================================================================
+ //
+ // Parameter:				-
+@@ -51,20 +53,33 @@ void Log_Open(char *filename)
+ 		printf("openlog <filename>\n");
+ 		return;
+ 	} //end if
++	logfile.filename[sizeof(logfile.filename) - 1] = '\0';
++	strncpy(logfile.filename, filename, sizeof(logfile.filename) - 1);
++}
++int Log_IsActive(void)
++{
++	if (logfile.fp)
++	{
++		return 1;
++	}
++	return 0;
++}
++static void real_Log_Open(void)
++{
+ 	if (logfile.fp)
+ 	{
+ 		printf("log file %s is already opened\n", logfile.filename);
+ 		return;
+ 	} //end if
+-	logfile.fp = fopen(filename, "wb");
++	logfile.fp = fopen(logfile.filename, "wb");
+ 	if (!logfile.fp)
+ 	{
+-		printf("can't open the log file %s\n", filename);
++		printf("can't open the log file %s\n", logfile.filename);
+ 		return;
+ 	} //end if
+-	strncpy(logfile.filename, filename, MAX_LOGFILENAMESIZE);
+ 	printf("Opened log %s\n", logfile.filename);
+-} //end of the function Log_Create
++	Log_Print("BSPC version "BSPC_VERSION", %s %s\n", __DATE__, __TIME__);
++}
+ //===========================================================================
+ //
+ // Parameter:				-
+@@ -130,6 +145,11 @@ void Log_Print(char *fmt, ...)
+ 	va_list ap;
+ 	char buf[2048];
+ 
++	if (!Log_IsActive())
++	{
++		real_Log_Open();
++	}
++
+ 	va_start(ap, fmt);
+ 	vsprintf(buf, fmt, ap);
+ 	va_end(ap);
+--- a/tools/mbspc/mbspc/l_log.h
++++ b/tools/mbspc/mbspc/l_log.h
+@@ -36,6 +36,8 @@ void Log_WriteTimeStamped(char *fmt, ...);
+ FILE *Log_FileStruct(void);
+ //flush log file
+ void Log_Flush(void);
++//see if the log is open
++int Log_IsActive(void);
+ 
+ #ifdef WINBSPC
+ void WinBSPCPrint(char *str);

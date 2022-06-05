@@ -1,0 +1,64 @@
+Description: quick fix for get the files in FHS locations
+ That is, instead of in the same directory as the application itself, we
+ now expect modules in /usr/lib/ARCH/nrcradiant/, arch-independent files
+ in /usr/share/nrcradiant/, and home config in ~/.config/nrcradiant/.
+ (TODO: this could use some cleanup/refactoring)
+
+diff --git a/include/qerplugin.h b/include/qerplugin.h
+index c8975ada..fa4c99c1 100644
+--- a/include/qerplugin.h
++++ b/include/qerplugin.h
+@@ -117,7 +117,7 @@ enum VIEWTYPE
+ struct _QERFuncTable_1
+ {
+ 	INTEGER_CONSTANT( Version, 1 );
+-	STRING_CONSTANT( Name, "radiant" );
++	STRING_CONSTANT( Name, "nrcradiant" );
+ 
+ 	const char* ( *getEnginePath )( );
+ 	const char* ( *getLocalRcPath )( );
+diff --git a/radiant/environment.cpp b/radiant/environment.cpp
+index 66e449a4..98b6fd1b 100644
+--- a/radiant/environment.cpp
++++ b/radiant/environment.cpp
+@@ -257,11 +257,12 @@ void environment_init( int argc, char* argv[] ){
+ 		ASSERT_MESSAGE( !string_empty( app_filepath.c_str() ), "failed to deduce app path" );
+ 		// NOTE: we build app path with a trailing '/'
+ 		// it's a general convention in Radiant to have the slash at the end of directories
+-		app_path = PathFilenameless( real );
++		//app_path = PathFilenameless( real );
++		app_path = "/usr/share/nrcradiant/";
+ 	}
+ 
+ 	if ( !portable_app_setup() ) {
+-		home_path = StringOutputStream( 256 )( DirectoryCleaned( g_get_home_dir() ), ".netradiant/" ).c_str();
++		home_path = StringOutputStream( 256 )( DirectoryCleaned( g_get_home_dir() ), ".config/nrcradiant/" ).c_str();
+ 		Q_mkdir( home_path.c_str() );
+ 	}
+ 	gamedetect();
+diff --git a/radiant/main.cpp b/radiant/main.cpp
+index 73209e32..4e445d9d 100644
+--- a/radiant/main.cpp
++++ b/radiant/main.cpp
+@@ -382,7 +382,7 @@ bool check_version(){
+ 	// let's leave it disabled in debug mode in any case
+ 	// http://zerowing.idsoftware.com/bugzilla/show_bug.cgi?id=431
+ #ifndef _DEBUG
+-#define CHECK_VERSION
++//#define CHECK_VERSION
+ #endif
+ #ifdef CHECK_VERSION
+ 	// locate and open RADIANT_MAJOR and RADIANT_MINOR
+diff --git a/radiant/mainframe.cpp b/radiant/mainframe.cpp
+index f974e9e4..734d9b89 100644
+--- a/radiant/mainframe.cpp
++++ b/radiant/mainframe.cpp
+@@ -621,7 +621,7 @@ void Radiant_detachGameToolsPathObserver( ModuleObserver& observer ){
+ void Radiant_Initialise(){
+ 	GlobalModuleServer_Initialise();
+ 
+-	Radiant_loadModulesFromRoot( AppPath_get() );
++	Radiant_loadModulesFromRoot( "/usr/lib/" RADIANT_EXECUTABLE "/nrcradiant/" );
+ 
+ 	Preferences_Load();
+ 

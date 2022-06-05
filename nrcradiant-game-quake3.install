@@ -1,0 +1,11 @@
+# Expected files here:
+#install/gamepacks/games/q3.game usr/share/nrcradiant/gamepacks/games/
+#install/gamepacks/q3.game usr/share/nrcradiant/gamepacks/
+
+# But they lacked docs. Instead take everything from here:
+games/Quake3Pack/tools/games/q3.game usr/share/nrcradiant/gamepacks/games/
+games/Quake3Pack/tools/q3.game usr/share/nrcradiant/gamepacks/
+
+games/Quake3Pack/baseq3 usr/share/nrcradiant/gamepacks/q3.game/
+games/Quake3Pack/docs usr/share/nrcradiant/gamepacks/q3.game/
+games/Quake3Pack/missionpack usr/share/nrcradiant/gamepacks/q3.game/

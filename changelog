@@ -1,0 +1,13 @@
+nrcradiant (1.5.0+20220528+1-0wjd1+REL) stable; urgency=medium
+
+  * Initial release
+  * TODO: Apply netradiant ab35d2859c400749e32f801ad8cc5284ac0a0078 so we can
+    save files without brush/entity numbers (denumberize):
+    https://netradiant.gitlab.io/post/2018-10-03-denumberized-maps/
+  * TODO: Move stuff from ./rules to a patch to a Makefile; that way we can
+    profit from upstream maintaining it.
+  * TODO: Upstream our path fixes.
+  * TODO: docs, which are saved in /usr/share/*radiant/ are not readable by
+    snap-sandboxed browsers. Should be in /usr/share/doc/*.
+
+ -- Walter Doekes <wjdoekes+netradiant@osso.nl>  Sun, 05 Jun 2022 14:04:29 +0200

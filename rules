@@ -1,0 +1,85 @@
+#!/usr/bin/make -f
+# -*- makefile -*-
+
+# Uncomment this to turn on verbose mode.
+export DH_VERBOSE=1
+
+# Uncomment this to change the hardening options
+export DEB_BUILD_MAINT_OPTIONS = hardening=+all
+
+ifneq (,$(filter parallel=%,$(DEB_BUILD_OPTIONS)))
+	NUMJOBS = $(patsubst parallel=%,%,$(filter parallel=%,$(DEB_BUILD_OPTIONS)))
+	MAKEFLAGS += -j$(NUMJOBS)
+endif
+
+DEB_HOST_MULTIARCH ?= $(shell dpkg-architecture -qDEB_HOST_MULTIARCH)
+
+INSTALL ?= install
+MV ?= mv
+
+%:
+	dh $@ --parallel
+
+override_dh_auto_configure:
+	# No need to get ./gamapacks-manager stuff here. The dockerfile
+	# setup will have downloaded the necessary stuff.
+	# BUILD=debug CFLAGS='-g -O2' <-- so we get symbols!
+	$(MAKE) \
+	  DOWNLOAD_GAMEPACKS=no \
+	  BUILD=debug CFLAGS='-g -O2' \
+	  dependencies-check
+	# Optionally, we could download from
+	# https://www.dropbox.com/s/b1xpajzfa6yjlzf/netradiant-custom-extra-gamepacks.zip
+	# like NRC does. They're extracted to ./install/ directly.
+
+override_dh_auto_build:
+	# Abuse EXE which gets propagated to RADIANT_EXECUTABLE:
+	dh_auto_build -- \
+	  DOWNLOAD_GAMEPACKS=no \
+	  BUILD=debug CFLAGS='-g -O2' \
+	  CXXFLAGS="-Wno-deprecated-declarations" \
+	  EXE=$(DEB_HOST_MULTIARCH) \
+	  RADIANT_ABOUTMSG='Custom build by wdoekes'
+
+override_dh_auto_test:
+	# Nothing to test..
+	true
+
+override_dh_auto_install:
+	$(INSTALL) -d debian/tmp/usr/bin
+	for path in h2data mbspc q2map q3map2 qdata3 radiant; do \
+	  $(MV) install/$$path.$(DEB_HOST_MULTIARCH) debian/tmp/usr/bin/$$path; \
+	  $(RM) install/$$path; \
+	done
+	mv debian/tmp/usr/bin/radiant debian/tmp/usr/bin/nrcradiant
+	ln -s mbspc debian/tmp/usr/bin/bspc
+	#
+	# This one is used by q3map2 and some modules..
+	$(INSTALL) -d debian/tmp/usr/lib/$(DEB_HOST_MULTIARCH)
+	mv install/libassimp_.so debian/tmp/usr/lib/$(DEB_HOST_MULTIARCH)/
+	#
+	$(INSTALL) -d debian/tmp/usr/lib/$(DEB_HOST_MULTIARCH)/nrcradiant/modules
+	$(INSTALL) -m0644 install/modules/*.so debian/tmp/usr/lib/$(DEB_HOST_MULTIARCH)/nrcradiant/modules/
+	$(RM) install/modules/*.so
+	$(INSTALL) -d debian/tmp/usr/lib/$(DEB_HOST_MULTIARCH)/nrcradiant/plugins
+	$(INSTALL) -m0644 install/plugins/*.so debian/tmp/usr/lib/$(DEB_HOST_MULTIARCH)/nrcradiant/plugins/
+	$(RM) install/plugins/*.so
+	#
+	$(INSTALL) -d debian/tmp/usr/share/nrcradiant
+	for path in bitmaps docs gl global.xlink modules plugins quake3.exclude; do \
+	  $(MV) install/$$path debian/tmp/usr/share/nrcradiant/$$path; \
+	done
+	#
+	$(INSTALL) -d debian/tmp/usr/share/applications
+	$(INSTALL) -m0644 debian/nrcradiant.desktop debian/tmp/usr/share/applications/
+	$(INSTALL) -d /usr/share/pixmaps
+	$(INSTALL) -m0644 icons/radiant-src.png /usr/share/pixmaps/
+	#
+	# Now we should only have gamepacks left here. We'll fetch those
+	# through the install files.
+	$(RM) install/RADIANT_MAJOR install/RADIANT_MINOR
+	if test "$$(ls -1 $(CURDIR)/install)" != gamepacks; then \
+	  echo "Unexpected leftover files (please fix):" >&2; \
+	  ls $(CURDIR)/install >&2; \
+	  false; \
+	fi
