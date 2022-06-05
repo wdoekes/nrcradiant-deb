@@ -47,16 +47,19 @@ override_dh_auto_test:
 
 override_dh_auto_install:
 	$(INSTALL) -d debian/tmp/usr/bin
-	for path in h2data mbspc q2map q3map2 qdata3 radiant; do \
-	  $(MV) install/$$path.$(DEB_HOST_MULTIARCH) debian/tmp/usr/bin/$$path; \
-	  $(RM) install/$$path; \
-	done
-	mv debian/tmp/usr/bin/radiant debian/tmp/usr/bin/nrcradiant
-	ln -s mbspc debian/tmp/usr/bin/bspc
+	$(MV) install/radiant.$(DEB_HOST_MULTIARCH) debian/tmp/usr/bin/nrcradiant
+	$(RM) install/radiant
 	#
 	# This one is used by q3map2 and some modules..
-	$(INSTALL) -d debian/tmp/usr/lib/$(DEB_HOST_MULTIARCH)
-	mv install/libassimp_.so debian/tmp/usr/lib/$(DEB_HOST_MULTIARCH)/
+	$(INSTALL) -d debian/tmp/usr/lib/$(DEB_HOST_MULTIARCH)/nrcradiant
+	mv install/libassimp_.so debian/tmp/usr/lib/$(DEB_HOST_MULTIARCH)/nrcradiant/
+	#
+	for path in h2data mbspc q2map q3map2 qdata3; do \
+	  $(MV) install/$$path.$(DEB_HOST_MULTIARCH) debian/tmp/usr/lib/$(DEB_HOST_MULTIARCH)/nrcradiant/$$path; \
+	  $(RM) install/$$path; \
+	  ln -s ../lib/$(DEB_HOST_MULTIARCH)/nrcradiant/$$path debian/tmp/usr/bin/$$path; \
+	done
+	ln -s mbspc debian/tmp/usr/bin/bspc
 	#
 	$(INSTALL) -d debian/tmp/usr/lib/$(DEB_HOST_MULTIARCH)/nrcradiant/modules
 	$(INSTALL) -m0644 install/modules/*.so debian/tmp/usr/lib/$(DEB_HOST_MULTIARCH)/nrcradiant/modules/
@@ -74,6 +77,13 @@ override_dh_auto_install:
 	$(INSTALL) -m0644 debian/nrcradiant.desktop debian/tmp/usr/share/applications/
 	$(INSTALL) -d /usr/share/pixmaps
 	$(INSTALL) -m0644 -T icons/radiant-src.png /usr/share/pixmaps/nrcradiant.png
+	#
+	# Remove suffix from binary calls:
+	find games install/gamepacks -name default_build_menu.xml | \
+	  xargs sed -i -e 's/[.][[]ExecutableType[]]//g'
+	# Replace enginepath with /usr/share/nrcradiant/gamepacks/q3.game/:
+	find games install/gamepacks -name q3.game -type f | \
+	  xargs sed -i -e 's@enginepath_linux="[^"]*"@enginepath_linux="/usr/share/nrcradiant/gamepacks/q3.game/"@'
 	#
 	# Now we should only have gamepacks left here. We'll fetch those
 	# through the install files.

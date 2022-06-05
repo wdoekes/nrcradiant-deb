@@ -36,8 +36,19 @@ index 66e449a4..98b6fd1b 100644
  		Q_mkdir( home_path.c_str() );
  	}
  	gamedetect();
-diff --git a/radiant/main.cpp b/radiant/main.cpp
-index 73209e32..4e445d9d 100644
+diff --git a/radiant/build.cpp b/radiant/build.cpp
+index 9887221b..f1db1a40 100644
+--- a/radiant/build.cpp
++++ b/radiant/build.cpp
+@@ -259,7 +259,7 @@ public:
+ 		if ( !m_buffer.empty() ) {
+ 			m_tool.push_back( new VariableString( m_buffer.c_str() ) );
+ 			// q3map2 ExtraResoucePath hack
+-			if( strstr( m_buffer.c_str(), "[RadiantPath]q3map2.[ExecutableType]" ) != nullptr // is q3map2
++			if( strstr( m_buffer.c_str(), "[RadiantPath]q3map2" ) != nullptr // is q3map2
+ 			 && strstr( m_buffer.c_str(), "[ExtraResoucePath]" ) == nullptr ){ // has no extra path right away (could have been added by this before)
+ 				m_tool.push_back( new VariableString( "[ExtraResoucePath]" ) );
+ 			}
 --- a/radiant/main.cpp
 +++ b/radiant/main.cpp
 @@ -382,7 +382,7 @@ bool check_version(){
@@ -50,15 +61,81 @@ index 73209e32..4e445d9d 100644
  #ifdef CHECK_VERSION
  	// locate and open RADIANT_MAJOR and RADIANT_MINOR
 diff --git a/radiant/mainframe.cpp b/radiant/mainframe.cpp
-index f974e9e4..734d9b89 100644
+index f974e9e4..cd3d4b62 100644
 --- a/radiant/mainframe.cpp
 +++ b/radiant/mainframe.cpp
-@@ -621,7 +621,7 @@ void Radiant_detachGameToolsPathObserver( ModuleObserver& observer ){
+@@ -371,12 +371,16 @@ const char* ExtraResourcePath_get(){
+ 
+ // App Path
+ 
+-CopiedString g_strAppPath;                 ///< holds the full path of the executable
++CopiedString g_strAppPath;                 ///< holds the path of the arch independent files
+ 
+ const char* AppPath_get(){
+ 	return g_strAppPath.c_str();
+ }
+ 
++const char* LibPath_get(){
++	return "/usr/lib/" RADIANT_EXECUTABLE "/nrcradiant/";
++}
++
+ /// the path to the local rc-dir
+ const char* LocalRcPath_get(){
+ 	static CopiedString rc_path;
+@@ -621,7 +625,7 @@ void Radiant_detachGameToolsPathObserver( ModuleObserver& observer ){
  void Radiant_Initialise(){
  	GlobalModuleServer_Initialise();
  
 -	Radiant_loadModulesFromRoot( AppPath_get() );
-+	Radiant_loadModulesFromRoot( "/usr/lib/" RADIANT_EXECUTABLE "/nrcradiant/" );
++	Radiant_loadModulesFromRoot( LibPath_get() );
  
  	Preferences_Load();
  
+diff --git a/radiant/mainframe.h b/radiant/mainframe.h
+index dd46ba58..0d7999df 100644
+--- a/radiant/mainframe.h
++++ b/radiant/mainframe.h
+@@ -192,6 +192,8 @@ const char* ExtraResourcePath_get();
+ extern CopiedString g_strAppPath;
+ const char* AppPath_get();
+ 
++const char* LibPath_get();
++
+ extern CopiedString g_strSettingsPath;
+ const char* SettingsPath_get();
+ 
+diff --git a/radiant/map.cpp b/radiant/map.cpp
+index 5884b29e..1536ba58 100644
+--- a/radiant/map.cpp
++++ b/radiant/map.cpp
+@@ -1699,7 +1699,7 @@ tryDecompile:
+ 	const char *type = GlobalRadiant().getGameDescriptionKeyValue( "q3map2_type" );
+ 	if ( path_extension_is( filename, "bsp" ) || path_extension_is( filename, "map" ) ) {
+ 		StringOutputStream str( 256 );
+-		str << AppPath_get() << "q3map2." << RADIANT_EXECUTABLE;
++		str << LibPath_get() << "q3map2";
+ 		str << " -v -game " << ( ( type && *type ) ? type : "quake3" );
+ 		str << " -fs_basepath " << makeQuoted( EnginePath_get() );
+ 		str << " -fs_homepath " << makeQuoted( g_qeglobals.m_userEnginePath.c_str() );
+@@ -2416,7 +2416,7 @@ void map_autocaulk_selected(){
+ 
+ 	{	// compile
+ 		StringOutputStream str( 256 );
+-		str << AppPath_get() << "q3map2." << RADIANT_EXECUTABLE
++		str << LibPath_get() << "q3map2"
+ 		    << " -game quake3"
+ 		    << " -fs_basepath " << makeQuoted( EnginePath_get() )
+ 		    << " -fs_homepath " << makeQuoted( g_qeglobals.m_userEnginePath )
+diff --git a/radiant/qe3.cpp b/radiant/qe3.cpp
+index e3256eea..7cfb0a32 100644
+--- a/radiant/qe3.cpp
++++ b/radiant/qe3.cpp
+@@ -163,7 +163,7 @@ bool ConfirmModified( const char* title ){
+ }
+ 
+ void bsp_init(){
+-	build_set_variable( "RadiantPath", AppPath_get() );
++	build_set_variable( "RadiantPath", LibPath_get() );
+ 	build_set_variable( "ExecutableType", RADIANT_EXECUTABLE );
+ 	build_set_variable( "EnginePath", EnginePath_get() );
+ 	build_set_variable( "UserEnginePath", g_qeglobals.m_userEnginePath.c_str() );
