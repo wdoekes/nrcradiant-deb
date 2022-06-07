@@ -6,15 +6,16 @@ like Quake III Arena.
 
 There are at least three competing versions out there:
 
-- 🔘 `GtkRadiant <https://github.com/wdoekes/gtkradiant-deb>`_ 1.6 (a
-  continuation of *GtkRadiant 1.4*, maintained by TTimo);
-- 🔘 `NetRadiant <https://github.com/wdoekes/netradiant-deb>`_ 1.5 (a
-  continuation of the *GtkRadiant 1.5*, maintained by Xonotic);
-- 👉 `NetRadiant-custom <https://github.com/wdoekes/nrcradiant-deb>`_ 1.5 (
-  an early fork of *NetRadiant*, maintained by Garux).
+- 🔘 `GtkRadiant <https://github.com/wdoekes/gtkradiant-deb>`_ 1.6
+  (a continuation of *GtkRadiant 1.4*, maintained by TTimo);
+- 🔘 `NetRadiant <https://github.com/wdoekes/netradiant-deb>`_ 1.5
+  a continuation of the *GtkRadiant 1.5*, maintained by Xonotic);
+- 👉 `NetRadiant-custom <https://github.com/wdoekes/nrcradiant-deb>`_ 1.5
+  (an early fork of *NetRadiant*, maintained by Garux).
 
-(There are more versions, including ``darkradiant`` which actually ships
-in the Ubuntu universe.)
+(There are more versions, including `DarkRadiant
+<https://salsa.debian.org/games-team/darkradiant>`_ which actually ships
+in the *Ubuntu* universe.)
 
 This repository contains build tools to build Debian/Ubuntu packages for
 `NetRadiant-custom <https://github.com/Garux/netradiant-custom>`_ along
