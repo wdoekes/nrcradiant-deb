@@ -10,7 +10,7 @@ There are at least three competing versions out there:
   continuation of the original 1.4, maintained by TTimo);
 - `NetRadiant <https://github.com/wdoekes/netradiant-deb>`_ 1.5 (a
   continuation of the original 1.5, maintained by Xonotic);
-- `NetRadiant-custom <https://github.com/wdoekes/netradiant-deb>`_, 1.5 (
+- `**NetRadiant-custom** <https://github.com/wdoekes/nrcradiant-deb>`_ 1.5 (
   an early fork of netradiant, maintained by Garux).
 
 (There are more versions, including ``darkradiant`` which actually ships
