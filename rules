@@ -17,6 +17,21 @@ DEB_HOST_MULTIARCH ?= $(shell dpkg-architecture -qDEB_HOST_MULTIARCH)
 INSTALL ?= install
 MV ?= mv
 
+MAKE_VARIABLES :=
+# No downloading of gamepacks.
+MAKE_VARIABLES := $(MAKE_VARIABLES) DOWNLOAD_GAMEPACKS=no
+# Enable debug build so our binaries are not stripped. But do optimize
+# and do not add extra debug assertions.
+MAKE_VARIABLES := $(MAKE_VARIABLES) BUILD=debug CFLAGS='-g -O2 -DNDEBUG'
+# -Wno-date-time = because SOURCE_DATE_EPOCH envvar already handles this
+# -Wno-deprecated-declarations = lots and lots of 'GTimeVal' is
+#   deprecated: Use 'GDateTime' instead.
+MAKE_VARIABLES := $(MAKE_VARIABLES) CXXFLAGS='-Wno-date-time -Wno-deprecated-declarations'
+# Abuse EXE to set our library subdirectory.
+MAKE_VARIABLES := $(MAKE_VARIABLES) EXE=$(DEB_HOST_MULTIARCH)
+# Add notice who built the files.
+MAKE_VARIABLES := $(MAKE_VARIABLES) RADIANT_ABOUTMSG='Custom build by wdoekes/nrcradiant-deb'
+
 %:
 	dh $@ --parallel
 
@@ -24,22 +39,13 @@ override_dh_auto_configure:
 	# No need to get ./gamapacks-manager stuff here. The dockerfile
 	# setup will have downloaded the necessary stuff.
 	# BUILD=debug CFLAGS='-g -O2' <-- so we get symbols!
-	$(MAKE) \
-	  DOWNLOAD_GAMEPACKS=no \
-	  BUILD=debug CFLAGS='-g -O2' \
-	  dependencies-check
+	$(MAKE) $(MAKE_VARIABLES) dependencies-check
 	# Optionally, we could download from
 	# https://www.dropbox.com/s/b1xpajzfa6yjlzf/netradiant-custom-extra-gamepacks.zip
 	# like NRC does. They're extracted to ./install/ directly.
 
 override_dh_auto_build:
-	# Abuse EXE which gets propagated to RADIANT_EXECUTABLE:
-	dh_auto_build -- \
-	  DOWNLOAD_GAMEPACKS=no \
-	  BUILD=debug CFLAGS='-g -O2' \
-	  CXXFLAGS="-Wno-deprecated-declarations" \
-	  EXE=$(DEB_HOST_MULTIARCH) \
-	  RADIANT_ABOUTMSG='Custom build by wdoekes'
+	dh_auto_build -- $(MAKE_VARIABLES)
 
 override_dh_auto_test:
 	# Nothing to test..
