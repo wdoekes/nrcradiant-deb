@@ -63,9 +63,7 @@ override_dh_auto_install:
 	for path in h2data mbspc q2map q3map2 qdata3; do \
 	  $(MV) install/$$path.$(DEB_HOST_MULTIARCH) debian/tmp/usr/lib/$(DEB_HOST_MULTIARCH)/nrcradiant/$$path; \
 	  $(RM) install/$$path; \
-	  ln -s ../lib/$(DEB_HOST_MULTIARCH)/nrcradiant/$$path debian/tmp/usr/bin/$$path; \
 	done
-	ln -s mbspc debian/tmp/usr/bin/bspc
 	#
 	$(INSTALL) -d debian/tmp/usr/lib/$(DEB_HOST_MULTIARCH)/nrcradiant/modules
 	$(INSTALL) -m0644 install/modules/*.so debian/tmp/usr/lib/$(DEB_HOST_MULTIARCH)/nrcradiant/modules/

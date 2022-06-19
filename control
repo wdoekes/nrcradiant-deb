@@ -29,11 +29,6 @@ Depends:
  ${shlibs:Depends},
  ${misc:Depends}
 Suggests: nrcradiant-game-quake3
-# Conflicts with gtkradiant/netradiant/nrcradiant, because they all
-# include the toolchain (q3map2, q3data, bspc, ...). Providing something
-# is not sufficient to block simultaneous install. We also need Conflicts.
-Conflicts: gtkradiant, netradiant
-Provides: gtkradiant-fork
 Description: nrcradiant contains (Garux) netradiant-custom and tools
  NetRadiant-custom (NRC) is the open source cross platform level editor for
  idTech games. This package contains the radiant editor, q3map2 compilers and
