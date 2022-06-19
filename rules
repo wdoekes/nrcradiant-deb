@@ -79,11 +79,6 @@ override_dh_auto_install:
 	  $(MV) install/$$path debian/tmp/usr/share/nrcradiant/$$path; \
 	done
 	#
-	$(INSTALL) -d debian/tmp/usr/share/applications
-	$(INSTALL) -m0644 debian/nrcradiant.desktop debian/tmp/usr/share/applications/
-	$(INSTALL) -d debian/tmp/usr/share/pixmaps
-	$(INSTALL) -m0644 -T icons/radiant.ico debian/tmp/usr/share/pixmaps/nrcradiant.png
-	#
 	# Remove suffix from binary calls:
 	find games install/gamepacks -name default_build_menu.xml | \
 	  xargs sed -i -e 's/[.][[]ExecutableType[]]//g'
