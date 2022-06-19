@@ -51,6 +51,7 @@ RUN . /etc/os-release && \
 # Set up upstream source, move debian dir and jump into dir.
 # We want the current NetRadiant build, but we do not need everything in the .git folder.
 COPY ./netradiant-custom/ /build/netradiant-custom
+COPY ./games/ /build/netradiant-custom/games
 WORKDIR /build/netradiant-custom
 
 # Make clean, reproducible tar, with 1970 timestamps, sorted, etc..

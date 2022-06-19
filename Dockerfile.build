@@ -51,7 +51,7 @@ version_suffix=$(git -C netradiant-custom log --date=short --format='%cd' |
 # Fetch game packs
 #GAMES='Quake2 Quake3'  # or 'all'
 GAMES=all
-if ! test $(du -sb netradiant-custom/ | cut -f1) -gt 101099099; then
+if ! test $(du -sb games/ | cut -f1) -gt 101099099; then
     LICENSEFILTER= BATCH=1 /bin/sh netradiant-custom/download-gamepacks.sh
 fi
 
