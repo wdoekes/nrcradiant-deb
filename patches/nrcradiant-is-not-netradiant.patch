@@ -1,0 +1,50 @@
+Description: rename NetRadiant in About to NetRadiant-custom
+
+diff --git a/radiant/console.cpp b/radiant/console.cpp
+index 14660ad2..5f128211 100644
+--- a/radiant/console.cpp
++++ b/radiant/console.cpp
+@@ -63,7 +63,7 @@ void Sys_LogFile( bool enable ){
+ 			time_t localtime;
+ 			time( &localtime );
+ 			globalOutputStream() << "Today is: " << ctime( &localtime )
+-			                     << "This is NetRadiant '" RADIANT_VERSION "' compiled " __DATE__ "\n" RADIANT_ABOUTMSG "\n";
++			                     << "This is NetRadiant-custom '" RADIANT_VERSION "' compiled " __DATE__ "\n" RADIANT_ABOUTMSG "\n";
+ 		}
+ 		else{
+ 			gtk_MessageBox( 0, "Failed to create log file, check write permissions in Radiant directory.\n",
+diff --git a/radiant/gtkdlgs.cpp b/radiant/gtkdlgs.cpp
+index 2579d0c7..f1a33674 100644
+--- a/radiant/gtkdlgs.cpp
++++ b/radiant/gtkdlgs.cpp
+@@ -466,7 +466,7 @@ void DoAbout(){
+ 	ModalDialog dialog;
+ 	ModalDialogButton ok_button( dialog, eIDOK );
+ 
+-	GtkWindow* window = create_modal_dialog_window( MainFrame_getWindow(), "About NetRadiant", dialog );
++	GtkWindow* window = create_modal_dialog_window( MainFrame_getWindow(), "About NetRadiant-custom", dialog );
+ 
+ 	{
+ 		GtkVBox* vbox = create_dialog_vbox( 4, 4 );
+@@ -492,7 +492,7 @@ void DoAbout(){
+ 			}
+ 
+ 			{
+-				GtkLabel* label = GTK_LABEL( gtk_label_new( "NetRadiant " RADIANT_VERSION "\n"
++				GtkLabel* label = GTK_LABEL( gtk_label_new( "NetRadiant-custom " RADIANT_VERSION "\n"
+ 				                                            __DATE__ "\n\n"
+ 				                                            RADIANT_ABOUTMSG "\n\n"
+ 				                                            "By alientrap.org\n\n"
+diff --git a/radiant/preferences.cpp b/radiant/preferences.cpp
+index 38992bb6..853bc47c 100644
+--- a/radiant/preferences.cpp
++++ b/radiant/preferences.cpp
+@@ -647,7 +647,7 @@ public:
+ GtkWindow* PrefsDlg::BuildDialog(){
+ 	PreferencesDialog_addInterfacePreferences( FreeCaller1<PreferencesPage&, Interface_constructPreferences>() );
+ 
+-	GtkWindow* dialog = create_floating_window( "NetRadiant Preferences", m_parent );
++	GtkWindow* dialog = create_floating_window( "NetRadiant-custom Preferences", m_parent );
+ 
+ 	GtkAccelGroup* accel = gtk_accel_group_new();
+ 	gtk_window_add_accel_group( dialog, accel );
