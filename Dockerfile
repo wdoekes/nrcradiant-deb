@@ -75,9 +75,10 @@ RUN git clean -dfx \
 
 # Make new debian dir and add everything this time (use our modified changelog).
 RUN mkdir debian && mv /build/debian/changelog debian/changelog
-COPY compat control rules nrcradiant.* nrcradiant-* debian/
+COPY compat control rules nrcradiant.* nrcradiant-* q3.make debian/
 COPY patches debian/patches
 COPY source debian/source
+RUN mv debian/q3.make debian/nrcradiant.q3make
 
 ###############################################################################
 # Build
