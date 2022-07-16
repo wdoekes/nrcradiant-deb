@@ -2,7 +2,10 @@ Description: quick fix for get the files in FHS locations
  That is, instead of in the same directory as the application itself, we
  now expect modules in /usr/lib/ARCH/nrcradiant/, arch-independent files
  in /usr/share/nrcradiant/, and home config in ~/.config/nrcradiant/.
- (TODO: this could use some cleanup/refactoring)
+ .
+ Also adds a docpath so we can open docs in sandboxed browsers.
+ .
+ For better fixes, we'd need to add various paths to CPPFLAGS in Makefile.
 
 diff --git a/include/qerplugin.h b/include/qerplugin.h
 index c8975ada..fa4c99c1 100644
@@ -21,12 +24,11 @@ diff --git a/radiant/environment.cpp b/radiant/environment.cpp
 index 66e449a4..98b6fd1b 100644
 --- a/radiant/environment.cpp
 +++ b/radiant/environment.cpp
-@@ -257,11 +257,12 @@ void environment_init( int argc, char* argv[] ){
+@@ -257,11 +257,11 @@ void environment_init( int argc, char* argv[] ){
  		ASSERT_MESSAGE( !string_empty( app_filepath.c_str() ), "failed to deduce app path" );
  		// NOTE: we build app path with a trailing '/'
  		// it's a general convention in Radiant to have the slash at the end of directories
 -		app_path = PathFilenameless( real );
-+		//app_path = PathFilenameless( real );
 +		app_path = "/usr/share/nrcradiant/";
  	}
  
@@ -64,7 +66,7 @@ diff --git a/radiant/mainframe.cpp b/radiant/mainframe.cpp
 index f974e9e4..cd3d4b62 100644
 --- a/radiant/mainframe.cpp
 +++ b/radiant/mainframe.cpp
-@@ -371,12 +371,16 @@ const char* ExtraResourcePath_get(){
+@@ -371,12 +371,20 @@ const char* ExtraResourcePath_get(){
  
  // App Path
  
@@ -75,6 +77,10 @@ index f974e9e4..cd3d4b62 100644
  	return g_strAppPath.c_str();
  }
  
++const char* DocPath_get(){
++	return "/usr/share/doc/nrcradiant/";
++}
++
 +const char* LibPath_get(){
 +	return "/usr/lib/" RADIANT_EXECUTABLE "/nrcradiant/";
 +}
@@ -95,10 +101,12 @@ diff --git a/radiant/mainframe.h b/radiant/mainframe.h
 index dd46ba58..0d7999df 100644
 --- a/radiant/mainframe.h
 +++ b/radiant/mainframe.h
-@@ -192,6 +192,8 @@ const char* ExtraResourcePath_get();
+@@ -192,6 +192,10 @@ const char* ExtraResourcePath_get();
  extern CopiedString g_strAppPath;
  const char* AppPath_get();
  
++const char* DocPath_get();
++
 +const char* LibPath_get();
 +
  extern CopiedString g_strSettingsPath;
@@ -139,3 +147,23 @@ index e3256eea..7cfb0a32 100644
  	build_set_variable( "ExecutableType", RADIANT_EXECUTABLE );
  	build_set_variable( "EnginePath", EnginePath_get() );
  	build_set_variable( "UserEnginePath", g_qeglobals.m_userEnginePath.c_str() );
+diff --git a/radiant/help.cpp b/radiant/help.cpp
+index cf011121..f70e3d23 100644
+--- a/radiant/help.cpp
++++ b/radiant/help.cpp
+@@ -120,7 +120,14 @@ void create_game_help_menu( GtkMenu *menu ){
+ #if 1
+ 	filename.clear();
+ 	filename << g_pGameDescription->mGameToolsPath << "game.xlink";
+-	process_xlink( filename.c_str(), g_pGameDescription->getRequiredKeyValue( "name" ), g_pGameDescription->mGameToolsPath.c_str(), menu );
++	StringOutputStream base_url( 256 );
++	base_url << g_pGameDescription->mGameToolsPath.c_str();
++	if (strncmp(base_url.c_str(), AppPath_get(), strlen(AppPath_get())) == 0) {
++		base_url.clear();
++		base_url << DocPath_get() << (
++			g_pGameDescription->mGameToolsPath.c_str() + strlen(AppPath_get()));
++	}
++	process_xlink( filename.c_str(), g_pGameDescription->getRequiredKeyValue( "name" ), base_url.c_str(), menu );
+ #else
+ 	for ( std::list<CGameDescription *>::iterator iGame = g_GamesDialog.mGames.begin(); iGame != g_GamesDialog.mGames.end(); ++iGame )
+ 	{

@@ -9,10 +9,10 @@ nrcradiant (1.5.0+20220528+1-WIP+REL) stable; urgency=medium
     default. This is where common-spog.pk3 lives and that contains the
     common texture images (caulk.tga and friends).
   * Fix missing icon.
-  * TODO: chromium snaps can read in /usr/share/doc, but not in
-    /usr/share/*radiant/... So, we should really try to move the docs if
-    possible. Otherwise the Jump-to-help doesn't work very well.
-  * TODO: Add q3.make somewhere.
+  * Add nrcradiant.q3make helper makefile in /usr/bin.
+  * Move docs to /usr/share/doc/nrcradiant so sandboxed browsers can read the
+    provided manuals.
+  * TODO: Document how nrcradiant.q3make works.
   * TODO: fix/remove EACCESS when starting. Not really a problem though.
     --- a/plugins/shaders/shaders.cpp
     +++ b/plugins/shaders/shaders.cpp
@@ -25,7 +25,7 @@ nrcradiant (1.5.0+20220528+1-WIP+REL) stable; urgency=medium
     |    }
     |  }
 
- -- Walter Doekes <wjdoekes+nrcradiant@osso.nl>  Sat, 16 Jul 2022 20:51:56 +0200
+ -- Walter Doekes <wjdoekes+nrcradiant@osso.nl>  Sat, 16 Jul 2022 23:34:18 +0200
 
 nrcradiant (1.5.0+20220528+1-0wjd1+REL) stable; urgency=medium
 

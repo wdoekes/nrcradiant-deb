@@ -27,7 +27,7 @@ MAKE_VARIABLES := $(MAKE_VARIABLES) BUILD=debug CFLAGS='-g -O2 -DNDEBUG'
 # -Wno-deprecated-declarations = lots and lots of 'GTimeVal' is
 #   deprecated: Use 'GDateTime' instead.
 MAKE_VARIABLES := $(MAKE_VARIABLES) CXXFLAGS='-Wno-date-time -Wno-deprecated-declarations'
-# Abuse EXE to set our library subdirectory.
+# Abuse EXE to set our library subdirectory (through RADIANT_EXECUTABLE).
 MAKE_VARIABLES := $(MAKE_VARIABLES) EXE=$(DEB_HOST_MULTIARCH)
 # Add notice who built the files.
 MAKE_VARIABLES := $(MAKE_VARIABLES) RADIANT_ABOUTMSG='Custom build by wdoekes/nrcradiant-deb'

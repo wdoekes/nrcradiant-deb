@@ -7,8 +7,10 @@ games/Quake3Pack/tools/games/q3.game usr/share/nrcradiant/gamepacks/games/
 games/Quake3Pack/tools/q3.game usr/share/nrcradiant/gamepacks/
 
 games/Quake3Pack/baseq3 usr/share/nrcradiant/gamepacks/q3.game/
-games/Quake3Pack/docs usr/share/nrcradiant/gamepacks/q3.game/
 games/Quake3Pack/missionpack usr/share/nrcradiant/gamepacks/q3.game/
+
+# Docs.
+games/Quake3Pack/docs usr/share/doc/nrcradiant/gamepacks/q3.game/
 
 # Contrib.
 debian/nrcradiant.q3make usr/bin/
