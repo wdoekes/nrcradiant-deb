@@ -1,4 +1,4 @@
-nrcradiant (1.5.0+20220528+1-WIP+REL) stable; urgency=medium
+nrcradiant (1.5.0+20220528+1-0wjd2+REL) stable; urgency=medium
 
   * Add "denumberized maps" (preferences -> save entity/brush numbers)
     so we can keep map changes in a vcs.

@@ -7,7 +7,7 @@ oscodename=${1:-ubuntu/jammy}  # ubuntu/focal
 upname=nrcradiant
 upversion=${2:-1.5.0}       # NetRadiant version
 debepoch=
-debversion=${3:-0wjd1}      # deb build version, e.g. 0wjd1
+debversion=${3:-0wjd2}      # deb build version, e.g. 0wjd1
 
 
 echo "Usage: $0 [$oscodename [$upversion [$debversion]]]"
