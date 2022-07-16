@@ -1,5 +1,4 @@
 *.swp
 
 /Dockerfile.out/
-/games/
-/netradiant-custom/
+/source-files/

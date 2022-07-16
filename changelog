@@ -9,8 +9,23 @@ nrcradiant (1.5.0+20220528+1-WIP+REL) stable; urgency=medium
     default. This is where common-spog.pk3 lives and that contains the
     common texture images (caulk.tga and friends).
   * Fix missing icon.
+  * TODO: chromium snaps can read in /usr/share/doc, but not in
+    /usr/share/*radiant/... So, we should really try to move the docs if
+    possible. Otherwise the Jump-to-help doesn't work very well.
+  * TODO: Add q3.make somewhere.
+  * TODO: fix/remove EACCESS when starting. Not really a problem though.
+    --- a/plugins/shaders/shaders.cpp
+    +++ b/plugins/shaders/shaders.cpp
+    @@ -1631,6 +1631,7 @@ bool shaderlist_findOrInstall( const char* engine...
+    |  StringOutputStream defaultShaderList( 256 );
+    |    defaultShaderList << toolsPath << gamename << '/' << "default_shad...
+    |    if ( file_exists( defaultShaderList.c_str() ) ) {
+    +      // XXX: EACCESS here
+    |      return file_copy( defaultShaderList.c_str(), absShaderList.c_str...
+    |    }
+    |  }
 
- -- Walter Doekes <wjdoekes+nrcradiant@osso.nl>  Sun, 05 Jun 2022 15:35:47 +0200
+ -- Walter Doekes <wjdoekes+nrcradiant@osso.nl>  Sat, 16 Jul 2022 20:51:56 +0200
 
 nrcradiant (1.5.0+20220528+1-0wjd1+REL) stable; urgency=medium
 

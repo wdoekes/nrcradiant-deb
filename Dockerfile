@@ -50,8 +50,8 @@ RUN . /etc/os-release && \
 
 # Set up upstream source, move debian dir and jump into dir.
 # We want the current NetRadiant build, but we do not need everything in the .git folder.
-COPY ./netradiant-custom/ /build/netradiant-custom
-COPY ./games/ /build/netradiant-custom/games
+COPY ./source-files/netradiant-custom/ /build/netradiant-custom
+COPY ./source-files/games/ /build/netradiant-custom/games
 WORKDIR /build/netradiant-custom
 
 # Make clean, reproducible tar, with 1970 timestamps, sorted, etc..
@@ -75,7 +75,7 @@ RUN git clean -dfx \
 
 # Make new debian dir and add everything this time (use our modified changelog).
 RUN mkdir debian && mv /build/debian/changelog debian/changelog
-COPY compat control rules nrcradiant.* nrcradiant-* q3.make debian/
+COPY compat control rules nrcradiant* q3.make debian/
 COPY patches debian/patches
 COPY source debian/source
 RUN mv debian/q3.make debian/nrcradiant.q3make

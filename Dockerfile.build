@@ -3,7 +3,7 @@ cd "$(dirname "$0")"  # jump to curdir
 set -eu
 
 # Pass these on the command line.
-oscodename=${1:-ubuntu/focal}  # ubuntu/focal
+oscodename=${1:-ubuntu/jammy}  # ubuntu/focal
 upname=nrcradiant
 upversion=${2:-1.5.0}       # NetRadiant version
 debepoch=
@@ -43,16 +43,19 @@ git_pull_or_clone() {
 }
 
 # Ensure we have NRC.
-git_pull_or_clone netradiant-custom https://github.com/Garux/netradiant-custom.git
+git_pull_or_clone source-files/netradiant-custom \
+    https://github.com/Garux/netradiant-custom.git
 # Improve versioning, based on the git version.
-version_suffix=$(git -C netradiant-custom log --date=short --format='%cd' |
-                 tr -d '-' | uniq -c | head -n1 | awk '{print $2 "+" $1}')
+version_suffix=$(\
+    git -C source-files/netradiant-custom log --date=short --format='%cd' |
+    tr -d '-' | uniq -c | head -n1 | awk '{print $2 "+" $1}')
 
 # Fetch game packs
 #GAMES='Quake2 Quake3'  # or 'all'
 GAMES=all
-if ! test $(du -sb games/ | cut -f1) -gt 101099099; then
-    LICENSEFILTER= BATCH=1 /bin/sh netradiant-custom/download-gamepacks.sh
+if ! test $(du -sb source-files/games/ | cut -f1) -gt 101099099; then
+    LICENSEFILTER= BATCH=1 /bin/sh \
+	source-files/netradiant-custom/download-gamepacks.sh
 fi
 
 # Update upversion adding the suffix in there.

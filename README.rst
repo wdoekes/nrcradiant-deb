@@ -21,17 +21,17 @@ This repository contains build tools to build Debian/Ubuntu packages for
 `NetRadiant-custom <https://github.com/Garux/netradiant-custom>`_ along
 with the *q3map2* compiler and *bspc* bot file builder.
 
-To get a glimpse of what *nrcradiant* can do, check out the `features
-presentation <https://garux.github.io/NRC/>_`.
+To get a glimpse of what *NRC/nrcradiant* can do, check out the `features
+presentation <https://garux.github.io/NRC/>`_.
 
 In the `releases section <../../releases>`_, you might find some
 precompiled debian packages... if you're lucky. But if there aren't any,
-building for your specific Debian derivative should be a breeze.
+building for your specific *Debian* derivative should be a breeze.
 
 
 
-Building NetRadiant-custom for your distro
-------------------------------------------
+Building NetRadiant-custom (NRC) for your distro
+------------------------------------------------
 
 Using Docker::
 
@@ -47,8 +47,8 @@ The files may look similar to these::
     -  4,935,336  nrcradiant_1.5.0+20220528+1-0wjd1+ubu22.04_amd64.deb
     -      7,632  nrcradiant_1.5.0+20220528+1-0wjd1+ubu22.04.debian.tar.xz
     -      1,305  nrcradiant_1.5.0+20220528+1-0wjd1+ubu22.04.dsc
-    - 8,5897,202  nrcradiant_1.5.0+20220528+1.orig.tar.gz
-    - 6,4066,598  nrcradiant-dbgsym_1.5.0+20220528+1-0wjd1+ubu22.04_amd64.ddeb
+    - 85,897,202  nrcradiant_1.5.0+20220528+1.orig.tar.gz
+    - 64,066,598  nrcradiant-dbgsym_1.5.0+20220528+1-0wjd1+ubu22.04_amd64.ddeb
     -  5,595,956  nrcradiant-game-quake3_1.5.0+20220528+1-0wjd1+ubu22.04_all.deb
 
 The ``nrcradiant*.orig.tar.gz`` contains source files from multiple
@@ -58,8 +58,9 @@ might not be recorded.)
 
 The ``nrcradiant*.deb`` holds files in::
 
-    - /usr/bin (nrcradiant, mbspc, q2map, q3map2, ...)
+    - /usr/bin (nrcradiant)
     - /usr/lib/x86_64-linux-gnu/nrcradiant (plugins/modules)
+    - /usr/lib/x86_64-linux-gnu/nrcradiant (also: mbspc, q2map, q3map2..)
     - /usr/share/nrcradiant (arch independent data files, images)
 
 The ``nrcradiant-game-quake3*.deb`` holds files in::
@@ -68,19 +69,23 @@ The ``nrcradiant-game-quake3*.deb`` holds files in::
     - /usr/share/nrcradiant/gamepacks/q3.game (game data)
 
 
-Running NetRadiant-custom
--------------------------
+Running NetRadiant-custom (NRC)
+-------------------------------
 
 Starting should be a matter of running ``nrcradiant``::
 
     $ dpkg -L nrcradiant | grep ^/usr/bin/
-    /usr/bin/bspc
-    /usr/bin/h2data
-    /usr/bin/mbspc
     /usr/bin/nrcradiant
-    /usr/bin/q2map
-    /usr/bin/q3map2
-    /usr/bin/qdata3
+
+Tools have been moved to the libdir, so they don't conflict with
+possible other radiant installs::
+
+    $ dpkg -L nrcradiant | grep '^/usr/lib/x86_64-linux-gnu/nrcradiant/[^/]*$'
+    /usr/lib/x86_64-linux-gnu/nrcradiant/h2data
+    /usr/lib/x86_64-linux-gnu/nrcradiant/mbspc
+    /usr/lib/x86_64-linux-gnu/nrcradiant/q2map
+    /usr/lib/x86_64-linux-gnu/nrcradiant/q3map2
+    /usr/lib/x86_64-linux-gnu/nrcradiant/qdata3
 
 Game configuration will be stored in ``~/.config/nrcradiant``::
 
