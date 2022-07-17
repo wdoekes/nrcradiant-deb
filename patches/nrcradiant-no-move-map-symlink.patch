@@ -3,6 +3,7 @@ From: Walter Doekes <walter+github@wjd.nu>
 Date: Sun, 12 Jun 2022 23:25:14 +0200
 Subject: [PATCH] Do not move symlinks when saving a map, overwrite target
  instead
+Forwarded: https://github.com/Garux/netradiant-custom/pull/108
 
 If the user is editing a symlink to a target instead of a real file,
 chances are high they want the symlink to stay in place.

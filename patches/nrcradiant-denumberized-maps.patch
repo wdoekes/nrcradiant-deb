@@ -3,6 +3,7 @@ Description: port of "denumberized maps" from netradiant proper
  by Thomas Debesse at Sat May 5 19:35:27 2018 +0200
  "add an opt-out setting to not write entity and brush number comment on map write"
  https://netradiant.gitlab.io/post/2018-10-03-denumberized-maps/
+Forwarded: https://github.com/Garux/netradiant-custom/issues/106
 
 diff --git a/include/imap.h b/include/imap.h
 index 9228954c..71239f51 100644
