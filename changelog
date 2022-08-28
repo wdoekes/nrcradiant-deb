@@ -1,3 +1,11 @@
+nrcradiant (1.5.0+20220827+2-WIP+REL) stable; urgency=medium
+
+  * Bump upstream version.
+  * Drop nrcradiant-no-move-map-symlink.patch that has been merged upstream.
+  * UNRELEASED/FIXME
+
+ -- Walter Doekes <wjdoekes+nrcradiant@osso.nl>  Sat, 28 Aug 2022 14:14:17 +0200
+
 nrcradiant (1.5.0+20220528+1-0wjd2+REL) stable; urgency=medium
 
   * Add "denumberized maps" (preferences -> save entity/brush numbers)
